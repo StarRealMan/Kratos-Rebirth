@@ -142,7 +142,7 @@ window.cancelIdleCallback = window.cancelIdleCallback || function(id) {
     };
 
     const setrandpic = ()=>{
-        // 图片
+        //图片
         const imageboxs = document.getElementsByClassName("kratos-entry-thumb-new-img");
         const prefix = kr.picCDN ? "//cdn.jsdelivr.net/gh/Candinya/Kratos-Rebirth@latest/source/" : "/";
         for (let i = 0, len = imageboxs.length; i < len; i++) {
@@ -172,7 +172,11 @@ window.cancelIdleCallback = window.cancelIdleCallback || function(id) {
                   if (alt) $(this).after('<span class="caption">' + alt + '</span>');
                   $(this).wrap('<a rel="gallery" href="' + this.src + '" data-fancybox=\"gallery\" data-caption="' + alt + '"></a>')
                 });
-            });
+            
+                $(this).find('.fancybox').each(function(){
+                  $(this).attr('rel', 'article' + i);
+                });
+              });
             $('.fancybox').fancybox();
           }
     };
@@ -242,55 +246,30 @@ ${kr.copyrightNotice}
         }
     };
 
-    const getTimeString = (msec, exact = true) => {
-        let tString;
-        const sec = msec / 1000;
-        const dnum = Math.floor(sec / 60 / 60 / 24);
-        const hnum = Math.floor(sec / 60 / 60 - (24 * dnum));
-        const mnum = Math.floor(sec / 60 - (24 * 60 * dnum) - (60 * hnum));
-        const snum = Math.floor(sec - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum));
-        let dstr = dnum.toString();
-        let hstr = hnum.toString();
-        let mstr = mnum.toString();
-        let sstr = snum.toString();
-        if (exact) {
-            if (dstr && dstr.length === 1) {
-                dstr = '0' + dstr;
-            }
-            if (hstr && hstr.length === 1) {
-                hstr = '0' + hstr;
-            }
-            if (mstr && mstr.length === 1) {
-                mstr = '0' + mstr;
-            }
-            if (sstr && sstr.length === 1) {
-                sstr = '0' + sstr;
-            }
-            tString = dstr + "天" + hstr + "小时" + mstr + "分" + sstr + "秒";
-        } else {
-            // 大概值
-            if (dnum < 540) {
-                // 一年半内
-                if (dnum < 60) {
-                    // 两个月内
-                    tString = dstr + "天";
-                } else {
-                    // 年内月外
-                    tString = Math.floor(dnum / 30).toString() + '个月';
-                }
-            } else {
-                // 年外
-                tString = Math.floor(dnum / 365).toString() + '年';
-            }
-        }
-        return tString;
-    };
-
     const initTime = () => {
-        const createTime = new Date(kr.createTime);
+        let now = new Date();
+        const grt = new Date(kr.createTime);
         const upTimeNode = document.getElementById("span_dt");
         setInterval(() => {
-            upTimeNode.innerText = getTimeString(Date.now() - createTime);
+            now.setTime(now.getTime() + 1000);
+            days = (now - grt) / 1000 / 60 / 60 / 24;
+                dnum = Math.floor(days);
+            hours = (now - grt) / 1000 / 60 / 60 - (24 * dnum);
+                hnum = Math.floor(hours);
+            if (String(hnum).length === 1) {
+                hnum = "0" + hnum;
+            }
+            minutes = (now - grt) / 1000 / 60 - (24 * 60 * dnum) - (60 * hnum);
+                mnum = Math.floor(minutes);
+            if (String(mnum).length === 1) {
+                mnum = "0" + mnum;
+            }
+            seconds = (now - grt) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+                snum = Math.round(seconds);
+            if (String(snum).length === 1) {
+                snum = "0" + snum;
+            }
+            upTimeNode.innerText = dnum + "天" + hnum + "小时" + mnum + "分" + snum + "秒";
         }, 1000);
     };
 
@@ -358,180 +337,7 @@ ${kr.copyrightNotice}
         }
     };
 
-    const expireNotify = () => {
-        if (kr.expire_day) {
-            const expireAlert = document.getElementById('expire-alert');
-            if (expireAlert) {
-                const dateTimeTag = expireAlert.querySelector('time');
-                const updateDateTime = new Date(parseInt(dateTimeTag.getAttribute('datetime')));
-                const nowDateTime = Date.now();
-                const gap = nowDateTime - updateDateTime;
-                if (gap > kr.expire_day * 24 * 3600 * 1000) {
-                    // 内容可能过期，需要提示
-                    dateTimeTag.innerText = getTimeString(gap, false);
-                    expireAlert.classList.remove('hidden');
-                }
-            }
-            
-        }
-    };
-
-    const tocAnimInit = () => {
-        if (document.getElementById('krw-toc') !== null) {
-            // 有toc的页面
-            // 获取所有的toc项
-            const tocDOMs = document.getElementsByClassName('toc-item');
-            // 元素高度映射记录
-            const tocHeightMap = [];
-            Array.from(tocDOMs).forEach((tocItem) => {
-                // 获取链接子元素
-                const linkItem = tocItem.getElementsByClassName('toc-link')[0];
-                // 获取链接地址
-                const titleText = decodeURI(linkItem.getAttribute('href'));
-                // 获取目标标题高度
-                const titleHeight = document.querySelector(titleText).offsetTop;
-                // 压入记录
-                tocHeightMap.push({
-                    h: titleHeight,
-                    el: tocItem
-                });
-            });
-
-            // 排序
-            tocHeightMap.sort((a, b) => {
-                return a.h - b.h;
-            });
-
-            // 标题定位函数
-            const tocGetId = (startPos = -1) => {
-                let newPos;
-                if (!Number.isInteger(startPos) || startPos < 0 || startPos > tocHeightMap.length - 1) {
-                    newPos = 0;
-                } else {
-                    newPos = startPos;
-                }
-                const nowY = window.scrollY;
-                if (tocHeightMap[0].h > nowY) {
-                    // 还没到第一级标题
-                    newPos = -1;
-                } else if (tocHeightMap[tocHeightMap.length - 1].h <= nowY) {
-                    // 最后一级标题
-                    newPos = tocHeightMap.length - 1;
-                } else {
-                    while (!(tocHeightMap[newPos].h <= nowY && tocHeightMap[newPos+1].h > nowY)) {
-                        if (tocHeightMap[newPos].h > nowY && newPos > 0) {
-                            newPos--;
-                        } else if (tocHeightMap[newPos+1].h <= nowY && newPos < tocHeightMap.length - 1) {
-                            newPos++;
-                        }
-                    }
-                }
-                return newPos;
-            }
-
-            // 标题激活状态修改函数
-            const tocActivate = (oldId, newId) => {
-                if (oldId === newId) {
-                    // Do nothing...
-                    return;
-                }
-                if (oldId !== -1) {
-                    // 清除旧标题激活状态
-                    tocHeightMap[oldId].el.classList.remove('active');
-                    tocHeightMap[oldId].el.classList.remove('show');
-                    // 清除旧元素层级展示状态
-                    let nCur = tocHeightMap[oldId].el
-                    while (!nCur.classList.contains('toc')) {
-                        if (nCur.classList.contains('toc-item')) {
-                            nCur.classList.remove('show');
-                        }
-                        nCur = nCur.parentNode;
-                    }
-                }
-                if (newId !== -1) {
-                    // 构建新标题激活状态
-                    tocHeightMap[newId].el.classList.add('active');
-                    tocHeightMap[newId].el.classList.add('show');
-                    // 建立新元素层级展示状态
-                    let nCur = tocHeightMap[newId].el
-                    while (!nCur.classList.contains('toc')) {
-                        if (nCur.classList.contains('toc-item')) {
-                            nCur.classList.add('show');
-                        }
-                        nCur = nCur.parentNode;
-                    }
-                }
-            };
-
-            // 初始化为不存在的标题
-            let curTocId = -1;
-            // 切换 toc 状态的处理函数
-            const toggleToc = () => {
-                const newTocId = tocGetId(curTocId);
-                tocActivate(curTocId, newTocId);
-                curTocId = newTocId;
-            };
-
-            // 处理事件的函数
-            const handleTocAnim = () => {
-                // 现在的检测事件ID
-                let nowEvent = 0;
-                window.requestAnimationFrame(() => {
-                    if (nowEvent) {
-                        // 为避免高频触发，使用检测事件来控制频率
-                        clearTimeout(nowEvent);
-                    }
-                    nowEvent = setTimeout((nowY) => {
-                        if (nowY === window.scrollY) {
-                            // 0.1s位置没有变化，视为页面停止
-                            toggleToc();
-                        }
-                    }, 100, window.scrollY);
-                });
-            }
-
-            window.addEventListener('scroll', handleTocAnim);
-
-            // 初始化完成运行一次
-            toggleToc();
-
-            // pjax前销毁
-            window.addEventListener('pjax:before', () => {
-                tocHeightMap.length = 0; // 奇妙的数组清空方式
-                window.removeEventListener('scroll', handleTocAnim);
-            }, { once: true });
-
-            // 阅读进度
-            const readProgBar = document.getElementsByClassName('toc-progress-bar')[0];
-            const setPercent = () => {
-                readProgBar.style.width = (window.scrollY / document.body.clientHeight * 100).toString() + '%';
-            }
-            window.addEventListener('scroll', () => {
-                window.requestAnimationFrame(setPercent);
-            });
-            setPercent(); // 初始运行一次
-
-            /**
-             * 现在的问题：
-             * 首次打开页面时候由于会有 window.onload 事件的等待存在，
-             * 所以会等待所有图片加载完成再调用核心的函数，因而基本保证
-             * 各标题间的位置不会乱动，但代价就是要等页面加载完成才能加
-             * 载toc样式，问题不是太大；
-             * pjax后则会由于没有 window.onload 事件的限制，因而容易
-             * 出现图片还没加载但是标题已经计算完成的情况，进而导致标题
-             * 定位乱飘，失去引导意义；
-             * 有一种解决方案是每次触发定位事件时都重新计算各元素高度，
-             * 但是怀疑那样会非常耗费时间，降低用户使用体验；
-             * 或者就是定时检测变化，但总觉得也非常不优雅，比较难受；
-             * 之后会考虑重载 hexo 的辅助函数，重写 asset_img 标签
-             * 用来内置 fancybox 的调用、计算图片大小进行格式转换与预
-             * 设置大小，但不知道 hexo 是否支持这样的操作，是否会报错，
-             * 还是说需要提交一个 PR 才能正确运行（猫咪摊手.jpg
-             */
-        }
-    };
-
-    const pjaxReload = () => {
+    $.fn.pjax_reload = ()=>{
         setrandpic();
         fancyboxInit();
         setCopyright();
@@ -539,23 +345,22 @@ ${kr.copyrightNotice}
         initMathjax();
         codeCopyInit();
         commentsLazyLoad();
-        expireNotify();
-        tocAnimInit();
+    };
+
+    const finishInfo = () => {
+        console.log('页面加载完毕！消耗了 %c'+Math.round(performance.now()*100)/100+' ms','background:#282c34;color:#51aded;');
     };
 
     const funcUsingConfig = () => {
         // 因为涉及到配置文件，所以这些是只有在完成配置加载后才能调用的函数
-        pjaxReload();
-
+        $(this).pjax_reload();
         copyEventInit();
         leaveEventInit();
         initTime();
         donateConfig();
     };
 
-    window.addEventListener('pjax:complete', pjaxReload);
-
-    window.addEventListener('window:onload', () => {
+    $(() => {
         loadConfig(funcUsingConfig);
         gotopInit();
         offcanvas();
@@ -563,11 +368,8 @@ ${kr.copyrightNotice}
         xControl();
         shareMenu();
         tocNavInit();
-    }, { once: true });
+    });
 
-    window.onload = () => {
-        window.dispatchEvent(new Event('window:onload'));
-        console.log('页面加载完毕！消耗了 %c'+Math.round(performance.now()*100)/100+' ms','background:#282c34;color:#51aded;');
-    };
+    window.onload = finishInfo();
 
 })();

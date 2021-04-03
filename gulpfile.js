@@ -1,11 +1,8 @@
 const { src, dest, parallel, watch } = require('gulp');
-const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
 const cleanCSS = require('gulp-clean-css');
 const terser = require('gulp-terser');
 const rename = require('gulp-rename');
-
-sass.compiler = require('sass');
 
 const configs = {
     autoprefixer: {
@@ -28,34 +25,24 @@ const configs = {
     }
 };
 
-function buildSass(cb) {
-    src('src/scss/*.scss')
-        .pipe(sass().on('error', sass.logError))
+function minifycss(cb) {
+    src('src/**/*.css')
         .pipe(autoprefixer(configs.autoprefixer))
         .pipe(cleanCSS(configs.cleanCSS))
         .pipe(rename({ suffix: '.min' }))
-        .pipe(dest('source/css'));
+        .pipe(dest('source'));
     cb();
 }
 
-function buildHighlight(cb) {
-    src('src/scss/highlight/theme/*.scss')
-        .pipe(sass().on('error', sass.logError))
-        .pipe(autoprefixer(configs.autoprefixer))
-        .pipe(cleanCSS(configs.cleanCSS))
-        .pipe(rename({ suffix: '.min' }))
-        .pipe(dest('source/css/highlight'));
-    cb();
-}
-
-function minifyJs(cb) {
-    src('src/js/*.js')
+function minifyjs(cb) {
+    src('src/**/*.js')
         .pipe(terser(configs.terser))
         .pipe(rename({ suffix: '.min' }))
-        .pipe(dest('source/js'));
+        .pipe(dest('source'));
     cb();
 }
 
-// watch('src/**', parallel(minifycss, minifyjs));
+watch('src/**', parallel(minifycss, minifyjs));
 
-exports.default = parallel(buildSass, minifyJs, buildHighlight);
+exports.build = parallel(minifycss, minifyjs);
+exports.default = parallel(minifycss, minifyjs);

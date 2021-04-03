@@ -14,6 +14,8 @@
 
 或者也可以去[项目Wiki](https://github.com/Candinya/Kratos-Rebirth/wiki)里面找找哦~
 
+有为这个主题专门开发两个页面，详见[Kratos-Rebirth-Specified-Pages](https://github.com/Candinya/Kratos-Rebirth-Specified-Pages)
+
 核心结构&样式来源：[@MoeDog](https://github.com/xb2016) 狗狗大佬的[Kratos](https://github.com/xb2016/kratos)的某个上古版本
 
 ## 💞 特别提示
@@ -22,33 +24,64 @@
 
 2. 这个Branch之后会持续加入一些也许是Hexo 5的新特性，这些特性未必完全兼容Hexo 4，如果您使用的是Hexo 4.x的话您可以移步[hexo-4 branch](https://github.com/Candinya/Kratos-Rebirth/tree/hexo-4)哦，或是更为推荐的，将Hexo升级至5.x版本呢。
 
-## 🍬 超棒的赞助者们
+## 🍬超棒的赞助者们
 
 - @vensing [GitHub](https://github.com/vensing) [Blog](https://vensing.com/)
 - @TsumugiWenders [GitHub](https://github.com/TsumugiWenders) [Blog](https://blog.nekopara.net/)
 
 ## 🎁 使用环境小贴士
 
-hexo的官方渲染器现在也已经支持文章置顶啦，配置`Front-Matter`段中的`sticky`参数即可实现置顶降序排序，可以参见生成器的[官方文档](https://github.com/hexojs/hexo-generator-index#usage)哦
+为了获得更佳的使用体验，建议安装的插件有：
 
-## 💬 支持的评论系统
+- hexo-generator-index-pin-top
+- hexo-generator-feed
 
-- [Disqus](https://disqus.com)
-- [DisqusJS](https://disqusjs.skk.moe/)
-- [Valine](https://valine.js.org)
-- [Twikoo](https://twikoo.js.org)
-- [Waline](https://waline.js.org)
+请注意，不同版本的 Hexo 及相关附属对于此模板的兼容性可能会存在一定的冲突，此处附上开发环境的`package.json`：
+
+``` json
+{
+  "name": "hexo-site",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "hexo generate",
+    "clean": "hexo clean",
+    "deploy": "hexo deploy",
+    "server": "hexo server"
+  },
+  "hexo": {
+    "version": "5.2.0"
+  },
+  "dependencies": {
+    "hexo": "^5.2.0",
+    "hexo-deployer-git": "^2.1.0",
+    "hexo-generator-archive": "^1.0.0",
+    "hexo-generator-category": "^1.0.0",
+    "hexo-generator-feed": "^3.0.0",
+    "hexo-generator-index-pin-top": "^0.2.2",
+    "hexo-generator-sitemap": "^2.1.0",
+    "hexo-generator-tag": "^1.0.0",
+    "hexo-renderer-ejs": "^1.0.0",
+    "hexo-renderer-marked": "^3.3.0",
+    "hexo-renderer-stylus": "^2.0.1",
+    "hexo-server": "^2.0.0"
+  }
+}
+```
 
 ## 🍩 二次开发相关
 
-为了保证最终上线产品的有效空间利用，我们引入了gulp对静态资源文件（js、css）进行压缩；因而您在src文件夹下直接修改的静态文件会无法实时生效，请安装gulp及相应的插件（在主题文件夹下`npm install`，使用`npx gulp`指令开启压缩与文件监听应该即可），以便压缩静态文件。
+为了保证最终上线产品的有效空间利用，我们引入了gulp对静态资源文件（js、css）进行压缩；因而您在src文件夹下直接修改的静态文件会无法实时生效，请安装gulp及相应的插件（在主题文件夹下`npm install`，使用`npx gulp`指令开启压缩与文件监听应该即可），以便压缩静态文件；
+
+另外，单次压缩完成后不退出是正常现象（因为有watch关注文件变化，当出现静态文件变化则直接自动构建压缩后版本，无需手动再执行npx gulp；在控制台Ctrl+C可结束进程；若您不希望自动监听，而是每次都使用构建的话，您可以直接将gulpfile.js的watch那一行（第44行）注释或是删除掉均可。
 
 ## 💮 非常感谢
 
 - [Kratos-pjax](https://github.com/xb2016/kratos-pjax)
-- [hexo-theme-sagiri](https://github.com/DIYgod/diygod.me/tree/master/themes/sagiri).
+- [hexo-theme-sagiri](https://github.com/DIYgod/diygod.me/tree/master/themes/sagiri)
 - [hexo-theme-suka](https://github.com/SukkaW/hexo-theme-suka)
 - [hexo-theme-landscape](https://github.com/hexojs/hexo-theme-landscape)
+- [DisqusJS](https://github.com/SukkaW/DisqusJS)
 - [APlayer](https://github.com/MoePlayer/APlayer)
 - [NProgress](https://github.com/rstacruz/nprogress)
 - [CloudFlare](https://www.cloudflare.com/)
